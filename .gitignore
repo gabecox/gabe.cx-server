@@ -1,0 +1,9 @@
+node_modules
+.env
+.env.production
+README.md
+dump.rdb
+dist
+deploy.sh
+/src/old_migrations/
+/src/prod_migrations/
