@@ -6,6 +6,7 @@ import {
   ObjectType,
   Query,
   Resolver,
+  UseMiddleware,
 } from "type-graphql";
 import argon2 from "argon2";
 import { v4 } from "uuid";
@@ -14,6 +15,7 @@ import { User, UserCredentials, LoginCredentials } from "../entities/User";
 import { FORGOT_PASSWORD_PREFIX } from "../constants";
 import { validateCredentials } from "../utils/validations";
 import { sendEmail } from "../utils/sendEmail";
+import { isGabe } from "../middleware/isGabe";
 
 @ObjectType()
 export class FieldError {
@@ -47,6 +49,7 @@ export class UserResolver {
   }
 
   @Mutation(() => UserResponse)
+  @UseMiddleware(isGabe)
   async register(
     @Arg("options") options: UserCredentials,
     @Ctx() { em, req }: MyContext
@@ -145,6 +148,7 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isGabe)
   async forgotPassword(
     @Arg("email") email: string,
     @Ctx() { em, redis }: MyContext

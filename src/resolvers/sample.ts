@@ -10,7 +10,8 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { isAuth } from "../middleware/isAuth";
+// import { isAuth } from "../middleware/isAuth";
+import { isGabe } from "../middleware/isGabe";
 
 @InputType()
 export class SampleType {
@@ -32,7 +33,8 @@ export class SampleResolver {
   }
 
   @Mutation(() => Sample)
-  @UseMiddleware(isAuth)
+  // @UseMiddleware(isAuth)
+  @UseMiddleware(isGabe)
   async createSample(
     @Arg("options") options: SampleType,
     @Ctx() { em }: MyContext
@@ -45,6 +47,7 @@ export class SampleResolver {
   }
 
   @Mutation(() => Sample, { nullable: true })
+  @UseMiddleware(isGabe)
   async updateSample(
     @Arg("id") id: number,
     @Arg("options") options: SampleType,
@@ -71,6 +74,7 @@ export class SampleResolver {
   }
 
   @Mutation(() => Boolean)
+  @UseMiddleware(isGabe)
   async deleteSample(
     @Arg("id") id: number,
     @Ctx() { em }: MyContext

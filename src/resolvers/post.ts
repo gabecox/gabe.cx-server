@@ -9,7 +9,8 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { isAuth } from "../middleware/isAuth";
+// import { isAuth } from "../middleware/isAuth";
+import { isGabe } from "../middleware/isGabe";
 import { QueryOrder } from "@mikro-orm/core";
 
 @Resolver()
@@ -58,7 +59,8 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
-  @UseMiddleware(isAuth)
+  // @UseMiddleware(isAuth)
+  @UseMiddleware(isGabe)
   async createPost(
     @Arg("options") options: PostInput,
     @Ctx() { em, req }: MyContext
@@ -73,7 +75,8 @@ export class PostResolver {
   }
 
   @Mutation(() => Post, { nullable: true })
-  @UseMiddleware(isAuth)
+  // @UseMiddleware(isAuth)
+  @UseMiddleware(isGabe)
   async updatePost(
     @Arg("id") id: number,
     @Arg("options") options: PostInput,
@@ -94,7 +97,8 @@ export class PostResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseMiddleware(isAuth)
+  // @UseMiddleware(isAuth)
+  @UseMiddleware(isGabe)
   async deletePost(
     @Arg("id") id: number,
     @Ctx() { em }: MyContext
