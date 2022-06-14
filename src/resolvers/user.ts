@@ -12,7 +12,6 @@ import argon2 from "argon2";
 import { v4 } from "uuid";
 import { MyContext } from "../types";
 import { User, UserCredentials, LoginCredentials } from "../entities/User";
-import { FORGOT_PASSWORD_PREFIX } from "../constants";
 import { validateCredentials } from "../utils/validations";
 import { sendEmail } from "../utils/sendEmail";
 import { isGabe } from "../middleware/isGabe";
@@ -33,6 +32,12 @@ export class UserResponse {
 
   @Field(() => User, { nullable: true })
   user?: User;
+}
+
+@ObjectType()
+export class EmailResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
 }
 
 @Resolver()
@@ -107,7 +112,7 @@ export class UserResolver {
         errors: [
           {
             field: "usernameOrEmail",
-            message: "invalid username or email",
+            message: "invalid username or password",
           },
         ],
       };
@@ -117,15 +122,13 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "password",
-            message: "invalid password",
+            field: "usernameOrEmail",
+            message: "invalid username or password",
           },
         ],
       };
     }
-
     req.session.userId = user.id;
-
     return {
       user,
     };
@@ -141,7 +144,6 @@ export class UserResolver {
           resolve(false);
           return;
         }
-
         resolve(true);
       });
     });
@@ -159,16 +161,19 @@ export class UserResolver {
       const token = v4();
 
       await redis.set(
-        FORGOT_PASSWORD_PREFIX + token,
+        process.env.FORGOT_PASSWORD_PREFIX + token,
         user.id,
         "EX",
         1000 * 60 * 60 * 2
       ); // 2 hours
 
-      sendEmail(
-        email,
-        `<a href="http://localhost:3000/change-password/${token}"> reset password </a>`
-      );
+      sendEmail({
+        from: "no-reply@gabe.cx",
+        to: email,
+        subject: "Password change request for gabe.cx",
+        text: "",
+        html: `<a href="${process.env.CORS_ORIGIN}/change-password/${token}">reset password </a>`,
+      });
     }
     return true;
   }
@@ -182,4 +187,22 @@ export class UserResolver {
   //   ) {
 
   //   }
+
+  @Mutation(() => Boolean)
+  async contactGabe(
+    @Arg("replyTo") replyTo: string,
+    @Arg("subject") subject: string,
+    @Arg("content") content: string
+  ) {
+    const info = await sendEmail({
+      to: "contact@gabe.cx",
+      from: "no-reply@gabe.cx",
+      replyTo,
+      subject,
+      text: content,
+    });
+    return new Promise((resolve) => {
+      info.accepted ? resolve(true) : resolve(false);
+    });
+  }
 }

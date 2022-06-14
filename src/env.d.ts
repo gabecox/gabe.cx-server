@@ -7,6 +7,7 @@ declare global {
       SESSION_SECRET: string;
       CORS_ORIGIN: string;
       COOKIE_NAME: string;
+      FORGOT_PASSWORD_PREFIX: string;
       GABE_UID: string;
     }
   }
